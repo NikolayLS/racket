@@ -1,0 +1,52 @@
+(define (char-digit? c)
+  (and
+   (char>=? c #\0)
+   (char<=? c #\9)))
+
+(define (char-space? c)
+  (if (char=? c #\space) #t
+      #f))
+
+(define (char-operation? c)
+  (or (char=? c #\+)
+      (char=? c #\-)
+      (char=? c #\/) (char=? c #\*)(char=? c #\^)))
+
+(define (fromCharToNumber c)
+ (cond ((char=? c #\0) 0)
+       ((char=? c #\1) 1)
+       ((char=? c #\2) 2)
+       ((char=? c #\3) 3)
+       ((char=? c #\4) 4)
+       ((char=? c #\5) 5)
+       ((char=? c #\6) 6)
+       ((char=? c #\7) 7)
+       ((char=? c #\8) 8)
+       ((char=? c #\9) 9)))
+       
+(define (expr-valid? expr)
+  (define (valid str ind finalElement spaceBeforeIndex?)
+    (cond ((equal? (string-length str) 0) #t)
+          ((>= ind (string-length str))
+               (if (equal? finalElement #f)
+                   #f
+                   #t))
+          ((equal? finalElement #f)
+           (cond ((char-operation? (string-ref str ind)) #f)
+                 ((char-space? (string-ref str ind)) (valid str (+ ind 1) #f #t))
+                 ((char-digit? (string-ref str ind)) (valid str (+ ind 1) #t #f))))
+          ((equal? finalElement #t)
+           (cond ((char-operation? (string-ref str ind)) (valid str (+ ind 1) #f #f))
+                 ((char-space? (string-ref str ind)) (valid str (+ ind 1) #t #t))
+                 ((char-digit? (string-ref str ind))
+                  (if (equal? spaceBeforeIndex? #t)
+                      #f
+                      (valid str (+ ind 1) #t #f)))))))
+  (valid expr 0 #f #f))
+
+(define (spaceRemover str)
+  (define (spaceRemover* str ind)
+    (cond ((>= ind (string-length str)) str)
+          ((char-space? (string-ref str ind)) (spaceRemover* (string-append (substring str 0 ind ) (substring str (+ ind 1) (string-length str))) ind))
+          (else (spaceRemover* str (+ ind 1)))))
+  (spaceRemover* str 0))
